@@ -255,6 +255,7 @@ public class FileMigrationUtils implements ApplicationContextAware {
             File parentFile = file.getParentFile();
             FileUtil.del(parentFile);
         }
+
         return response;
     }
 
