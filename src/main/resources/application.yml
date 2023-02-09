@@ -1,0 +1,33 @@
+server.port: 8055
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://10.1.85.93:3306/ycgjdb?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+#    username: ycgjdbusr
+#    password: RHPNjisW0EtKDHSZ
+#yc:
+#  fileServer:
+#    appCode: CL_4
+#    license: SunICMS#uroahf63n59ch6s8bn5m58sg
+#    port: 8088
+#    ip: 10.1.84.40
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.1.101.137:3306/ycgjdb?useUnicode=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: ycgjusr
+    password: ycgjusr_2Ll
+yc:
+  fileServer:
+    appCode: CL_4
+    license: SunICMS#uroahf63n59ch6s8bn5m58sg
+    port: 28088
+    ip: 10.11.66.206
+
+mybatis-plus:
+  mapper-locations: classpath*:com/example/file/xml/*.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+

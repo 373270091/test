@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.file.mapper.ClaimAttachmentMapper">
+
+    <select id="getList" parameterType="string" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            ca.*
+        FROM
+            claim_primary AS cp
+                LEFT JOIN claim_attachment AS ca ON cp.id = ca.claim_primary_id
+        WHERE
+            <if test="no != null">
+                cp.regist_no = #{no} and
+            </if>
+            cp.STATUS = 5
+          AND ca.supply_flag != 2  AND ca.supply_flag != 3 AND ca.path LIKE '%yongcheng%'
+	        LIMIT 100
+        </select>
+
+    <select id="recover" parameterType="long" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            ca.*,cp.damage_id
+        FROM
+            claim_primary AS cp
+                LEFT JOIN claim_attachment AS ca ON cp.id = ca.claim_primary_id
+        WHERE
+        cp.status = 5 and
+            <if test="id != null">
+                cp.regist_no = #{id} and
+            </if>
+            ca.supply_flag =2 AND ca.type IN (6,7,8,10)
+            <if test="id != null">
+                LIMIT 1
+            </if>
+            <if test="id == null">
+                LIMIT 100
+            </if>
+    </select>
+
+
+    <select id="getIdCardPath" resultType="string">
+        SELECT
+            ${path}
+        FROM
+            certificate_info
+        WHERE
+            insu_person_family_id = #{id} AND ${path} LIKE concat('%',#{fileName},'%')
+            LIMIT 1
+    </select>
+
+    <select id="getPath" parameterType="long" resultType="string">
+        SELECT
+            path
+        FROM
+            insured_materials
+        WHERE
+            insu_person_family_id = #{id} AND path LIKE concat('%',#{fileName},'%')
+            LIMIT 1
+    </select>
+
+    <update id="updateState">
+        update claim_attachment set supply_flag = #{state} where id = #{id}
+    </update>
+
+    <select id="getDamageId" parameterType="string" resultType="long">
+        SELECT damage_id FROM claim_primary WHERE regist_no = #{registNo}
+    </select>
+
+
+    <select id="sx" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            ca.*,cp.damage_id
+        FROM
+            claim_attachment ca
+                LEFT JOIN claim_primary cp ON ca.claim_primary_id = cp.id
+        WHERE
+            ca.supply_flag = 2
+          AND ca.type IN ( 6, 7, 8 )
+          AND ca.path NOT LIKE "https://bucket-tpa.oss-cn-qingdao.aliyuncs.com/ychgjBak/download%"
+    </select>
+
+    <select id="selectClaimId" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            id,claim_primary_id
+        FROM
+            claim_attachment
+        WHERE
+            supply_flag >= 2
+            AND type IN ( 6, 7, 8 )
+            <if test="id != 0">
+                AND id > #{id}
+            </if>
+        GROUP BY claim_primary_id LIMIT 200
+    </select>
+
+    <select id="selectMapList" resultType="java.util.HashMap">
+        SELECT
+            cp.regist_no as registNo,
+            ci.face_img_path as faceImgPath,
+            ci.back_img_path as backImgPath,
+            pi.bank_img as bankImg,
+            pi.id_card as idCard
+        FROM
+            claim_primary cp
+            LEFT JOIN certificate_info ci ON cp.damage_id = ci.insu_person_family_id
+            LEFT JOIN payee_info pi ON cp.payee_info_id = pi.id
+        WHERE
+            cp.id IN
+            <foreach collection="list" open="(" item="item" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="selectIdList" resultType="java.util.HashMap">
+        select ${fieldStr},regist_no,damage_care_no from   claim_primary where  id in
+        <foreach collection="list" open="(" item="item" separator="," close=")">
+            #{item}
+        </foreach>
+        group by ${fieldStr}
+    </select>
+
+
+    <select id="selectIdCard" resultType="java.util.HashMap">
+        select face_img_path,back_img_path from  certificate_info where  insu_person_family_id = #{id}
+    </select>
+
+    <select id="selectPayee" resultType="java.util.HashMap">
+        select id_card,bank_img,payee_account_id from  payee_info where  id = #{id}
+    </select>
+
+    <select id="selectOther" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            path as path,insu_person_family_id as claim_primary_id
+        FROM
+            insured_materials
+        WHERE
+            is_deleted = 0
+        GROUP BY path ORDER BY id
+    </select>
+
+    <select id="selectRegistNoByDamageId" resultType="string">
+        SELECT regist_no FROM claim_primary WHERE damage_id =#{id}
+    </select>
+
+    <select id="selectMigrationData" resultType="com.example.file.model.ClaimAttachment">
+        SELECT
+            *
+        FROM
+            claim_attachment
+        WHERE
+            delete_flag = 0
+            AND (supply_flag != 10 OR supply_flag IS NULL) AND supply_flag !=11 AND supply_flag !=12 AND `no` IS NULL AND page_id IS NULL
+            AND path LIKE "%fileName=%" AND path NOT LIKE "%bucket-tpa.oss-cn-qingdao.aliyuncs.com%"
+        <if test="id != 0">
+            AND claim_primary_id = #{id}
+        </if>
+        ORDER BY id LIMIT 100
+    </select>
+
+    <select id="selectSupplyFlag">
+        SELECT id,claim_primary_id,type,no,page_id,path,supply_flag FROM claim_attachment WHERE supply_flag = 10 LIMIT 100
+    </select>
+
+</mapper>
