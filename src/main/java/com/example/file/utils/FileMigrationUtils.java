@@ -247,7 +247,9 @@ public class FileMigrationUtils implements ApplicationContextAware {
             autoScanApi.setFormat("xml");
             response = autoScanApi.ScanImageFile(fileServerAppCode, zipPath);
             log.info("上传至影像件服务器响应：{}", response);
-        } catch (Exception e) {
+        }catch (NoClassDefFoundError e){
+            log.error("第三方jar包出问题了",e);
+        }catch (Exception e) {
             log.error("上传至影像件服务器异常", e);
             e.printStackTrace();
         } finally {
